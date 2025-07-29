@@ -73,6 +73,9 @@ docker-compose.override.yml
 # IDE / エディタ関連
 # =============================================================================
 
+# Claude Code関連ファイル
+.claude/
+
 # Visual Studio Code
 .vscode/
 !.vscode/settings.json

@@ -1,0 +1,174 @@
+.game-room {
+  max-width: 1200px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.match-id {
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.leave-button {
+  background-color: #e74c3c;
+}
+
+.leave-button:hover {
+  background-color: #c0392b;
+}
+
+.game-content {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .game-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.game-area {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.game-status {
+  margin-bottom: 20px;
+}
+
+.game-status h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.players-info {
+  margin-top: 15px;
+}
+
+.players-info h4 {
+  color: #34495e;
+  margin-bottom: 10px;
+}
+
+.player-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  background-color: #ecf0f1;
+}
+
+.player-info.white {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.player-info.black {
+  background-color: #343a40;
+  color: white;
+}
+
+.game-board-placeholder {
+  min-height: 400px;
+  background-color: #ecf0f1;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #7f8c8d;
+}
+
+.todo-note {
+  font-size: 14px;
+  color: #95a5a6;
+}
+
+.chat-area {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  height: 600px;
+  text-align: left;
+}
+
+.chat-area h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #ecf0f1;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #fafafa;
+  text-align: left;
+}
+
+.chat-message {
+  margin-bottom: 8px;
+  word-wrap: break-word;
+}
+
+.chat-message.system {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.chat-username {
+  font-weight: bold;
+  margin-right: 5px;
+  color: #3498db;
+}
+
+.chat-message.system .chat-username {
+  color: #95a5a6;
+}
+
+.chat-message.my-message .chat-username {
+  color: #27ae60; /* 自分のメッセージ: 緑色 */
+}
+
+.chat-message.other-message .chat-username {
+  color: #e74c3c; /* 他人のメッセージ: 赤色 */
+}
+
+.chat-text {
+  color: #2c3e50;
+}
+
+.chat-input-form {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.send-button {
+  padding: 10px 20px;
+  font-size: 14px;
+}

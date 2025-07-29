@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(ls:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(npm run dev:*)",
+      "Bash(chmod:*)",
+      "Bash(./start.sh:*)",
+      "Bash(./start.bat)",
+      "Bash(pwsh ./start.ps1)",
+      "Bash(docker:*)",
+      "Bash(sudo docker-compose:*)",
+      "Bash(service docker:*)",
+      "Bash(curl:*)",
+      "Bash(groups)",
+      "Bash(sudo:*)",
+      "Bash(ss:*)",
+      "Bash(pgrep:*)",
+      "Bash(go mod:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}

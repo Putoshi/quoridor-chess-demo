@@ -1,0 +1,13 @@
+.login-container {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.login-container h2 {
+  margin-bottom: 20px;
+  color: #34495e;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}

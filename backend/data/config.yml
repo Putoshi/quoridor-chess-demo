@@ -1,0 +1,22 @@
+name: quoridor-chess
+data_dir: /nakama/data
+
+logger:
+  level: "DEBUG"
+
+console:
+  port: 7351
+  username: "admin"
+  password: "password"
+
+socket:
+  server_key: "defaultkey"
+  port: 7350
+  max_message_size_bytes: 4096
+
+session:
+  encryption_key: "defaultencryptionkey"
+  token_expiry_sec: 7200
+
+runtime:
+  http_key: "defaulthttpkey"

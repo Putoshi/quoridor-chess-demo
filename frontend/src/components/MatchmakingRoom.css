@@ -1,0 +1,94 @@
+.matchmaking-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.welcome {
+  font-size: 18px;
+  color: #7f8c8d;
+  margin-bottom: 30px;
+}
+
+.status-box {
+  background-color: #ecf0f1;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.status {
+  font-size: 20px;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.searching-animation {
+  display: flex;
+  gap: 5px;
+  margin-top: 15px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background-color: #3498db;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes pulse {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.primary-button {
+  background-color: #27ae60;
+  padding: 15px 30px;
+  font-size: 18px;
+}
+
+.primary-button:hover {
+  background-color: #229954;
+}
+
+.secondary-button {
+  background-color: #3498db;
+  padding: 15px 30px;
+  font-size: 18px;
+}
+
+.cancel-button {
+  background-color: #e74c3c;
+  padding: 15px 30px;
+  font-size: 18px;
+}
+
+.cancel-button:hover {
+  background-color: #c0392b;
+}

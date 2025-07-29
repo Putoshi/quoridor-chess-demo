@@ -14,33 +14,49 @@ class NakamaService {
     this.client = new Client('defaultkey', 'localhost', '7350', false);
   }
 
-  // authenticate - デバイスIDベースでユーザー認証を行う
-  // 新規ユーザーの場合は自動的にアカウントを作成
+  // authenticate - ユーザー名専用のデバイスIDベースで認証を行う
+  // 各ユーザー名に対して固有のアカウントを作成・管理
   async authenticate(username: string): Promise<Session> {
+    console.log('=== NEW AUTHENTICATION SYSTEM ===');
     console.log('Authenticating with username:', username);
-    const create = true;  // 新規ユーザー作成を許可
-    // デバイスIDを使用して認証（ゲストログイン方式）
-    const session = await this.client.authenticateDevice(this.generateDeviceId(), create, username);
-    console.log('Authentication successful, session:', session);
-    console.log('Session username:', session.username);
-    console.log('Session user_id:', session.user_id);
     
-    // ユーザー名が一致しない場合は更新（新規ユーザーでも既存ユーザーでも）
-    if (session.username !== username) {
-      console.log(`Username mismatch. Session: "${session.username}", Requested: "${username}"`);
-      console.log('Updating username...');
-      try {
-        await this.client.updateAccount(session, { username: username });
-        console.log('Username updated successfully');
-        // セッションのユーザー名も更新
-        session.username = username;
-      } catch (error) {
-        console.error('Failed to update username:', error);
+    // ユーザー名専用のデバイスIDを生成
+    const deviceId = this.generateDeviceId(username);
+    console.log('Using device ID for user:', deviceId);
+    
+    try {
+      // 既存アカウント確認のため、まず作成なしで認証を試行
+      console.log('Checking for existing account...');
+      const session = await this.client.authenticateDevice(deviceId, false);
+      console.log('✅ EXISTING USER FOUND - NO CHANGES MADE');
+      console.log('Session username:', session.username);
+      console.log('Session user_id:', session.user_id);
+      this.session = session;
+      return session;
+    } catch (error) {
+      console.log('No existing user found, creating new account for:', username);
+      
+      // 新規ユーザー作成
+      const session = await this.client.authenticateDevice(deviceId, true, username);
+      console.log('✅ NEW USER CREATED');
+      console.log('Session username:', session.username);
+      console.log('Session user_id:', session.user_id);
+      
+      // 新規作成時のユーザー名設定確認
+      if (session.username !== username) {
+        console.log('Setting username for new account...');
+        try {
+          await this.client.updateAccount(session, { username: username });
+          session.username = username;
+          console.log('Username set successfully');
+        } catch (updateError) {
+          console.error('Failed to set username:', updateError);
+        }
       }
+      
+      this.session = session;
+      return session;
     }
-    
-    this.session = session;
-    return session;
   }
 
   // connectSocket - WebSocketリアルタイム通信接続を確立
@@ -137,25 +153,38 @@ class NakamaService {
     await this.client.sendFriendRequest(this.session, this.session.user_id);
   }
 
-  // generateDeviceId - デバイス固有IDを生成・管理
-  // ローカルストレージに保存してユーザーの永続化を実現
-  private generateDeviceId(): string {
-    const storedId = localStorage.getItem('device_id');
+  // generateDeviceId - ユーザー固有のデバイスIDを生成・管理
+  // ユーザー名ベースでローカルストレージに保存して個別ユーザーの永続化を実現
+  private generateDeviceId(username: string): string {
+    const deviceKey = `device_id_${username}`;
+    const storedId = localStorage.getItem(deviceKey);
     if (storedId) {
-      return storedId;  // 既存のデバイスIDを使用
+      return storedId;  // 既存のユーザー固有デバイスIDを使用
     }
 
-    // 新しいランダムなデバイスIDを生成
-    const newId = 'device_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('device_id', newId);
+    // 新しいランダムなデバイスIDを生成（ユーザー名プレフィックス付き）
+    const newId = `device_${username}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem(deviceKey, newId);
     return newId;
   }
 
-  // clearDeviceId - デバイスIDをリセットして新しいユーザーとして認証
+  // clearDeviceId - 指定ユーザーのデバイスIDをリセットして新しいユーザーとして認証
   // デバッグ用途で別のユーザーアカウントを作成したい場合に使用
-  clearDeviceId(): void {
-    localStorage.removeItem('device_id');
-    console.log('Device ID cleared. Next login will create a new user.');
+  clearDeviceId(username?: string): void {
+    if (username) {
+      const deviceKey = `device_id_${username}`;
+      localStorage.removeItem(deviceKey);
+      console.log(`Device ID cleared for user: ${username}. Next login will create a new user.`);
+    } else {
+      // 全てのデバイスIDをクリア（後方互換性）
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('device_id')) {
+          localStorage.removeItem(key);
+        }
+      });
+      console.log('All device IDs cleared. Next login will create new users.');
+    }
   }
 
   // disconnect - WebSocket接続を切断してリソースをクリーンアップ

@@ -1,7 +1,7 @@
 // Quoridor Chess マッチメイキングルームコンポーネント
 // プライベートマッチの作成と参加機能を提供
 // ログイン後の対戦相手とのマッチングを管理
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { nakamaService } from '../utils/nakama';
 import './MatchmakingRoom.css';
 

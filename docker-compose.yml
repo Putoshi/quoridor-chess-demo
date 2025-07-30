@@ -25,15 +25,13 @@ services:
       - "-ecx"
       - >
           /nakama/nakama migrate up --database.address postgres:localdb@postgres:5432/nakama &&
-          exec /nakama/nakama --config /nakama/data/config-minimal.yml --database.address postgres:localdb@postgres:5432/nakama --socket.outgoing_queue_size=64
+          exec /nakama/nakama --name quoridor-chess --database.address postgres:localdb@postgres:5432/nakama --logger.level INFO --session.token_expiry_sec 7200 --socket.server_key defaultkey --console.port 7351 --console.username admin --console.password password
     restart: always
     links:
       - "postgres:db"
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./backend/data:/nakama/data
     expose:
       - "7349"
       - "7350"

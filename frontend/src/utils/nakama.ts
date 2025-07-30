@@ -179,13 +179,13 @@ class NakamaService {
 
   // sendChatMessage - チャットメッセージを送信（現在は未実装）
   // 実際のチャット機能はsendMatchDataを通じて実装される
-  async sendChatMessage(message: string): Promise<void> {
+  async sendChatMessage(_message: string): Promise<void> {
     if (!this.session) {
       throw new Error('No session available');
     }
 
     // 注意: この実装は未完成。実際のチャットはsendMatchDataで実装
-    await this.client.sendFriendRequest(this.session, this.session.user_id);
+    console.log('sendChatMessage is not implemented - use sendMatchData instead');
   }
 
   // clearSession - 現在のセッションをクリア（ログアウト時に使用）

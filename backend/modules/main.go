@@ -6,10 +6,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"time"
 
-	"github.com/heroiclabs/nakama-common/api"
 	"github.com/heroiclabs/nakama-common/runtime"
 )
 
@@ -88,6 +86,14 @@ type Player struct {
 type Position struct {
 	X int `json:"x"` // X座標（0-8）
 	Y int `json:"y"` // Y座標（0-8、白プレイヤーは8から開始、黒プレイヤーは0から開始）
+}
+
+// abs - 整数の絶対値を返す（ヘルパー関数）
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 // Board - ゲームボードの状態を管理する構造体
@@ -257,7 +263,77 @@ func (m *QuoridorChessMatch) MatchLoop(ctx context.Context, logger runtime.Logge
 			dispatcher.BroadcastMessage(2, chatMsgBytes, nil, nil, true)
 			
 		case "move":
-			// TODO: コマ移動ロジックの実装
+			// コマ移動処理
+			if !m.gameState.GameStarted {
+				continue // ゲームが開始されていない場合は無視
+			}
+			
+			// 自分のターンかチェック
+			if msg.GetUserId() != m.gameState.CurrentTurn {
+				continue // 自分のターンでない場合は無視
+			}
+			
+			// 移動先の座標を取得
+			position, ok := data["position"].(map[string]interface{})
+			if !ok {
+				continue
+			}
+			
+			x, xOk := position["x"].(float64)
+			y, yOk := position["y"].(float64)
+			if !xOk || !yOk {
+				continue
+			}
+			
+			// プレイヤー情報を取得
+			player := m.gameState.Players[msg.GetUserId()]
+			if player == nil {
+				continue
+			}
+			
+			// 移動の妥当性をチェック（基本的な移動のみ）
+			newX := int(x)
+			newY := int(y)
+			
+			// ボード範囲内チェック
+			if newX < 0 || newX > 8 || newY < 0 || newY > 8 {
+				continue
+			}
+			
+			// 基本的な隣接移動チェック（1マスのみ）
+			dx := newX - player.Position.X
+			dy := newY - player.Position.Y
+			
+			// 斜め移動は不可、1マスのみ移動可能
+			if (dx != 0 && dy != 0) || (abs(dx) + abs(dy) != 1) {
+				continue
+			}
+			
+			// 移動実行
+			player.Position.X = newX
+			player.Position.Y = newY
+			
+			// 勝利判定
+			if (player.Color == "white" && newY == 0) || (player.Color == "black" && newY == 8) {
+				m.gameState.Winner = msg.GetUserId()
+				m.gameState.GameStarted = false
+			}
+			
+			// ターンを切り替え
+			for id := range m.gameState.Players {
+				if id != m.gameState.CurrentTurn {
+					m.gameState.CurrentTurn = id
+					break
+				}
+			}
+			
+			// ゲーム状態更新を全プレイヤーに通知
+			updateMsg := map[string]interface{}{
+				"type": "game_state_update",
+				"data": m.gameState,
+			}
+			updateMsgBytes, _ := json.Marshal(updateMsg)
+			dispatcher.BroadcastMessage(1, updateMsgBytes, nil, nil, true)
 			
 		case "place_wall":
 			// TODO: 壁配置ロジックの実装
@@ -295,51 +371,14 @@ func (m *QuoridorChessMatch) MatchSignal(ctx context.Context, logger runtime.Log
 // JoinMatchmaking - マッチメイキングに参加するRPC
 // クライアントがマッチメイキングプールに参加要求を送信
 func JoinMatchmaking(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
-	// リクエストコンテキストからユーザーIDを取得
-	userID, _ := ctx.Value(runtime.RUNTIME_CTX_USER_ID).(string)
-	
-	// ユーザーをマッチメイキングプールに追加
-	ticket, err := nk.MatchmakerAdd(ctx, &api.MatchmakerAdd{
-		MinCount: MinPlayers, // 最小プレイヤー数（2人）
-		MaxCount: MaxPlayers, // 最大プレイヤー数（2人）
-		StringProperties: map[string]string{
-			"game_type": "quoridor_chess", // ゲームタイプ識別子
-		},
-	})
-	
-	if err != nil {
-		return "", err
-	}
-	
-	// マッチメイキングチケットをクライアントに返却
-	response := map[string]interface{}{
-		"ticket": ticket,
-	}
-	
-	bytes, _ := json.Marshal(response)
-	return string(bytes), nil
+	// この機能は現在無効化されており、クライアント側で直接マッチ作成・参加を行います
+	return "{\"message\": \"matchmaking disabled, use create/join match directly\"}", nil
 }
 
 // LeaveMatchmaking - マッチメイキングから退出するRPC
 // クライアントが指定したチケットでマッチメイキングプールから退出
 func LeaveMatchmaking(ctx context.Context, logger runtime.Logger, db *sql.DB, nk runtime.NakamaModule, payload string) (string, error) {
-	// リクエストペイロードを解析
-	var request map[string]string
-	if err := json.Unmarshal([]byte(payload), &request); err != nil {
-		return "", err
-	}
-	
-	// マッチメイキングチケットを取得
-	ticket := request["ticket"]
-	if ticket == "" {
-		return "", fmt.Errorf("ticket required")
-	}
-	
-	// マッチメイキングプールから削除
-	if err := nk.MatchmakerRemove(ctx, ticket); err != nil {
-		return "", err
-	}
-	
+	// この機能は現在無効化されており、クライアント側で直接マッチを退出します
 	return "{\"success\": true}", nil
 }
 

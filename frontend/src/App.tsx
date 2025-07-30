@@ -1,7 +1,7 @@
 // Quoridor Chess Online - メインアプリケーションコンポーネント
 // アプリ全体の状態管理とルーティングを担当
 // ログイン → マッチメイキング → ゲームルームの流れを制御
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { nakamaService } from './utils/nakama';
 import MatchmakingRoom from './components/MatchmakingRoom';
 import GameRoom from './components/GameRoom';

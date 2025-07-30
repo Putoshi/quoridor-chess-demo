@@ -1,13 +1,108 @@
+/* Quoridor Chess ログインコンポーネント用CSS */
+/* ログイン画面のレイアウトとスタイリング */
+
+/* ログインコンテナ - カード風のデザイン */
 .login-container {
+  width: 100%;
   max-width: 400px;
-  margin: 0 auto;
+  margin: 80px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* ログインタイトル */
 .login-container h2 {
-  margin-bottom: 20px;
-  color: #34495e;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
 }
 
-.form-group {
+/* フォームグループ - 入力フィールドのマージン調整 */
+.login-container .form-group {
   margin-bottom: 20px;
+}
+
+/* 入力フィールド - 統一されたスタイル */
+.login-container input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+/* 入力フィールド - フォーカス時のスタイル */
+.login-container input:focus {
+  border-color: #4CAF50;
+  background-color: white;
+  outline: none;
+}
+
+/* 入力フィールド - 無効化時のスタイル */
+.login-container input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+/* ログインボタン - プライマリボタンスタイル */
+.login-container button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background-color: #4CAF50;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* ログインボタン - ホバー時のエフェクト */
+.login-container button[type="submit"]:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+/* ログインボタン - 無効化時のスタイル */
+.login-container button[type="submit"]:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* モード切り替えセクション */
+.mode-switch {
+  margin-top: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+/* リンクボタン - テキストリンク風のボタン */
+.link-button {
+  background: none;
+  border: none;
+  color: #4CAF50;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  margin-left: 5px;
+  transition: color 0.3s ease;
+}
+
+.link-button:hover:not(:disabled) {
+  color: #45a049;
+}
+
+.link-button:disabled {
+  color: #cccccc;
+  cursor: not-allowed;
 }

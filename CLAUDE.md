@@ -202,10 +202,12 @@ quoridor-chess-demo/
    - TypeScript型チェック有効
 
 ### 🔐 認証システム
-1. **デバイスID**: localStorage保存の永続ID
-2. **自動アカウント作成**: 初回アクセス時
-3. **ユーザー名更新**: 認証後に表示名を更新
-4. **デバッグ用**: `nakamaService.clearDeviceId()`で新規ユーザー作成
+1. **Custom ID認証**: `ユーザー名:パスワード` 形式のCustom IDを使用
+2. **新規登録**: `authenticateCustom(customId, true)` で新規アカウント作成
+3. **ログイン**: `authenticateCustom(customId, false)` で既存アカウント認証
+4. **パスワード要件**: 最小6文字以上
+5. **セッション管理**: Nakamaセッションによる状態管理
+6. **デバッグ用**: `nakamaService.clearSession()`でログアウト
 
 ## デバッグ・トラブルシューティング
 

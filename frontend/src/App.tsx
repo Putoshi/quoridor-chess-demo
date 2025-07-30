@@ -34,17 +34,33 @@ function App() {
 
   // handleLogin - ユーザーログイン処理
   // 認証とWebSocket接続を行い、成功時はマッチメイキング画面に遷移
-  const handleLogin = async (name: string) => {
+  const handleLogin = async (name: string, password: string) => {
     try {
       console.log('App.tsx: Attempting login with name:', name);
-      await nakamaService.authenticate(name);    // デバイスID認証
-      await nakamaService.connectSocket();       // WebSocket接続確立
+      await nakamaService.authenticate(name, password);    // パスワード認証
+      await nakamaService.connectSocket();                  // WebSocket接続確立
       console.log('App.tsx: Setting username to:', name);
       setUsername(name);
-      setAppState('matchmaking');                // マッチメイキング画面に遷移
-    } catch (error) {
+      setAppState('matchmaking');                          // マッチメイキング画面に遷移
+    } catch (error: any) {
       console.error('Login failed:', error);
-      alert('ログインに失敗しました');
+      alert(error.message || 'ログインに失敗しました');
+    }
+  };
+
+  // handleRegister - 新規ユーザー登録処理
+  // 新規アカウントを作成し、成功時は自動的にログイン
+  const handleRegister = async (name: string, password: string) => {
+    try {
+      console.log('App.tsx: Attempting registration with name:', name);
+      await nakamaService.register(name, password);        // 新規登録
+      await nakamaService.connectSocket();                  // WebSocket接続確立
+      console.log('App.tsx: Registration successful, setting username to:', name);
+      setUsername(name);
+      setAppState('matchmaking');                          // マッチメイキング画面に遷移
+    } catch (error: any) {
+      console.error('Registration failed:', error);
+      alert(error.message || '登録に失敗しました');
     }
   };
 
@@ -69,7 +85,7 @@ function App() {
       
       {/* ログイン画面 - アプリ起動時の初期画面 */}
       {appState === 'login' && (
-        <Login onLogin={handleLogin} />
+        <Login onLogin={handleLogin} onRegister={handleRegister} />
       )}
       
       {/* マッチメイキング画面 - ログイン後の対戦相手検索・マッチ作成 */}

@@ -14,48 +14,83 @@ class NakamaService {
     this.client = new Client('defaultkey', 'localhost', '7350', false);
   }
 
-  // authenticate - ユーザー名専用のデバイスIDベースで認証を行う
-  // 各ユーザー名に対して固有のアカウントを作成・管理
-  async authenticate(username: string): Promise<Session> {
-    console.log('=== NEW AUTHENTICATION SYSTEM ===');
-    console.log('Authenticating with username:', username);
-    
-    // ユーザー名専用のデバイスIDを生成
-    const deviceId = this.generateDeviceId(username);
-    console.log('Using device ID for user:', deviceId);
+  // authenticate - ユーザー名とパスワードで認証を行う
+  // セキュアな認証でユーザーアカウントを保護
+  async authenticate(username: string, password: string): Promise<Session> {
+    console.log('=== PASSWORD-BASED AUTHENTICATION ===');
+    console.log('Authenticating user:', username);
     
     try {
-      // 既存アカウント確認のため、まず作成なしで認証を試行
-      console.log('Checking for existing account...');
-      const session = await this.client.authenticateDevice(deviceId, false);
-      console.log('✅ EXISTING USER FOUND - NO CHANGES MADE');
+      // カスタムIDで認証（ユーザー名+パスワードの組み合わせ）
+      console.log('Attempting to authenticate with custom ID...');
+      const customId = `${username}:${password}`;
+      const session = await this.client.authenticateCustom(
+        customId,
+        false  // 新規作成なし
+      );
+      console.log('✅ Authentication successful');
       console.log('Session username:', session.username);
       console.log('Session user_id:', session.user_id);
       this.session = session;
       return session;
-    } catch (error) {
-      console.log('No existing user found, creating new account for:', username);
+    } catch (error: any) {
+      console.error('Authentication failed:', error);
+      if (error.status === 404 || error.message?.includes('not found')) {
+        throw new Error('ユーザーが見つかりません。新規登録してください');
+      }
+      throw new Error('ユーザー名またはパスワードが正しくありません');
+    }
+  }
+
+  // register - 新規ユーザー登録
+  // ユーザー名とパスワードで新しいアカウントを作成
+  async register(username: string, password: string): Promise<Session> {
+    console.log('=== NEW USER REGISTRATION ===');
+    console.log('Registering new user:', username);
+    
+    try {
+      // まず既存ユーザーをチェック
+      const customId = `${username}:${password}`;
+      try {
+        await this.client.authenticateCustom(customId, false);
+        // 既に存在する場合
+        throw new Error('このユーザー名は既に使用されています');
+      } catch (checkError: any) {
+        // 404エラーの場合は新規作成可能
+        if (checkError.status !== 404 && !checkError.message?.includes('not found')) {
+          throw checkError;
+        }
+      }
       
       // 新規ユーザー作成
-      const session = await this.client.authenticateDevice(deviceId, true, username);
-      console.log('✅ NEW USER CREATED');
+      const session = await this.client.authenticateCustom(
+        customId,
+        true  // 新規作成を許可
+      );
+      console.log('✅ Registration successful');
       console.log('Session username:', session.username);
       console.log('Session user_id:', session.user_id);
       
-      // 新規作成時のユーザー名設定確認
+      // ユーザー名を更新
       if (session.username !== username) {
-        console.log('Setting username for new account...');
         try {
           await this.client.updateAccount(session, { username: username });
           session.username = username;
-          console.log('Username set successfully');
         } catch (updateError) {
-          console.error('Failed to set username:', updateError);
+          console.warn('Failed to update username:', updateError);
         }
       }
       
       this.session = session;
       return session;
+    } catch (error: any) {
+      console.error('Registration failed:', error);
+      
+      // エラーメッセージがある場合はそれを使用
+      if (error.message) {
+        throw error;
+      }
+      throw new Error('登録に失敗しました');
     }
   }
 
@@ -153,38 +188,14 @@ class NakamaService {
     await this.client.sendFriendRequest(this.session, this.session.user_id);
   }
 
-  // generateDeviceId - ユーザー固有のデバイスIDを生成・管理
-  // ユーザー名ベースでローカルストレージに保存して個別ユーザーの永続化を実現
-  private generateDeviceId(username: string): string {
-    const deviceKey = `device_id_${username}`;
-    const storedId = localStorage.getItem(deviceKey);
-    if (storedId) {
-      return storedId;  // 既存のユーザー固有デバイスIDを使用
+  // clearSession - 現在のセッションをクリア（ログアウト時に使用）
+  clearSession(): void {
+    this.session = null;
+    if (this.socket) {
+      this.socket.disconnect(true);
+      this.socket = null;
     }
-
-    // 新しいランダムなデバイスIDを生成（ユーザー名プレフィックス付き）
-    const newId = `device_${username}_${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem(deviceKey, newId);
-    return newId;
-  }
-
-  // clearDeviceId - 指定ユーザーのデバイスIDをリセットして新しいユーザーとして認証
-  // デバッグ用途で別のユーザーアカウントを作成したい場合に使用
-  clearDeviceId(username?: string): void {
-    if (username) {
-      const deviceKey = `device_id_${username}`;
-      localStorage.removeItem(deviceKey);
-      console.log(`Device ID cleared for user: ${username}. Next login will create a new user.`);
-    } else {
-      // 全てのデバイスIDをクリア（後方互換性）
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.startsWith('device_id')) {
-          localStorage.removeItem(key);
-        }
-      });
-      console.log('All device IDs cleared. Next login will create new users.');
-    }
+    console.log('Session cleared. User logged out.');
   }
 
   // disconnect - WebSocket接続を切断してリソースをクリーンアップ

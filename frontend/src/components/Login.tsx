@@ -6,40 +6,59 @@ import './Login.css';
 
 // LoginProps - ログインコンポーネントのプロパティ型定義
 interface LoginProps {
-  onLogin: (username: string) => void; // ログイン成功時のコールバック関数
+  onLogin: (username: string, password: string) => void; // ログイン成功時のコールバック関数
+  onRegister: (username: string, password: string) => void; // 新規登録時のコールバック関数
 }
 
-// Login メインコンポーネント - シンプルなユーザー名入力フォーム
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+// Login メインコンポーネント - ユーザー名とパスワード入力フォーム
+const Login: React.FC<LoginProps> = ({ onLogin, onRegister }) => {
   // 状態管理 - ユーザー入力とローディング状態
   const [username, setUsername] = useState('');        // ユーザー名入力フィールド
+  const [password, setPassword] = useState('');        // パスワード入力フィールド
   const [isLoading, setIsLoading] = useState(false);   // ログイン処理中フラグ
+  const [isRegisterMode, setIsRegisterMode] = useState(false); // 新規登録モードフラグ
 
   // handleSubmit - フォーム送信処理
-  // ユーザー名のバリデーションとログイン処理を実行
+  // ユーザー名とパスワードのバリデーションと認証処理を実行
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // ユーザー名の空白チェック
+    // 入力バリデーション
     if (!username.trim()) {
       alert('ユーザー名を入力してください');
+      return;
+    }
+    
+    if (!password) {
+      alert('パスワードを入力してください');
+      return;
+    }
+    
+    if (password.length < 6) {
+      alert('パスワードは6文字以上で入力してください');
       return;
     }
 
     setIsLoading(true);  // ローディング状態を開始
     try {
-      await onLogin(username.trim());  // 親コンポーネントのログイン処理を呼び出し
+      if (isRegisterMode) {
+        await onRegister(username.trim(), password);  // 新規登録処理
+      } else {
+        await onLogin(username.trim(), password);  // ログイン処理
+      }
     } catch (error) {
-      setIsLoading(false);  // エラー時はローディングを終了
+      // エラー処理は親コンポーネント（App.tsx）で行われる
+    } finally {
+      setIsLoading(false);  // 成功・失敗に関わらずローディングを終了
     }
   };
 
-  // JSXレンダリング - シンプルなログインフォームUI
+  // JSXレンダリング - ログイン/新規登録フォームUI
   return (
     <div className="login-container container">
-      <h2>ゲームに参加</h2>
+      <h2>{isRegisterMode ? '新規登録' : 'ログイン'}</h2>
       
-      {/* ユーザー名入力フォーム */}
+      {/* 認証フォーム */}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <input
@@ -52,11 +71,51 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           />
         </div>
         
-        {/* ログインボタン - ローディング中や空白入力時は無効化 */}
-        <button type="submit" disabled={isLoading || !username.trim()}>
-          {isLoading ? '接続中...' : 'ログイン'}
+        <div className="form-group">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="パスワードを入力（6文字以上）"
+            disabled={isLoading}  // ローディング中は入力無効化
+            minLength={6}         // 最小6文字
+          />
+        </div>
+        
+        {/* ログイン/登録ボタン */}
+        <button type="submit" disabled={isLoading || !username.trim() || !password}>
+          {isLoading ? '処理中...' : (isRegisterMode ? '登録' : 'ログイン')}
         </button>
       </form>
+      
+      {/* モード切り替えリンク */}
+      <div className="mode-switch">
+        {isRegisterMode ? (
+          <>
+            既にアカウントをお持ちの方は
+            <button 
+              type="button" 
+              className="link-button"
+              onClick={() => setIsRegisterMode(false)}
+              disabled={isLoading}
+            >
+              ログイン
+            </button>
+          </>
+        ) : (
+          <>
+            初めての方は
+            <button 
+              type="button" 
+              className="link-button"
+              onClick={() => setIsRegisterMode(true)}
+              disabled={isLoading}
+            >
+              新規登録
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 };

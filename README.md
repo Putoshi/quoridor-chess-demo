@@ -176,13 +176,3 @@ cd frontend
 npm run dev
 ```
 
----
-
-## ライセンス
-
-このプロジェクトはMITライセンスの下で公開されています。
-
-## 謝辞
-
-- [Nakama](https://heroiclabs.com/nakama/) - 優秀なオープンソースゲームサーバー
-- [Quoridor](https://en.wikipedia.org/wiki/Quoridor) - 素晴らしいボードゲーム

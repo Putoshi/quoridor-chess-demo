@@ -96,9 +96,9 @@ start-win.bat
 ### アーキテクチャ
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐
-│   React Client  │◄────────────────►│  Nakama Server  │
-│   (TypeScript)  │                │   (Go modules)  │
-└─────────────────┘                └─────────────────┘
+│   React Client  │◄───────────────►│  Nakama Server  │
+│   (TypeScript)  │                 │   (Go modules)  │
+└─────────────────┘                 └─────────────────┘
                                            │
                                            ▼
                                    ┌─────────────────┐
@@ -155,12 +155,6 @@ cd frontend
 rm -rf node_modules package-lock.json
 npm install
 ```
-
-## 開発への貢献
-
-1. **Issues**: バグレポートや機能要求
-2. **Pull Requests**: コードの改善提案
-3. **ドキュメント**: 説明の改善や翻訳
 
 ### 開発環境のセットアップ
 ```bash
